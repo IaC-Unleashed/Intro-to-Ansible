@@ -1,0 +1,2 @@
+[droplets]
+iac-test-server ansible_host=<public_ip_server> ansible_connection=ssh ansible_user=root

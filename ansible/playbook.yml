@@ -1,0 +1,74 @@
+---
+- hosts: iac-test-server
+  become: true
+  vars:
+    created_username: brett
+    server_name: "{{ ansible_default_ipv4.address }}"
+    document_root: /var/www/html
+  vars_files:
+    - external_vars.yml
+  tasks:
+    - name: Setup passwordless sudo
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^%sudo'
+        line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+        validate: '/usr/sbin/visudo -cf %s'
+      tags:
+        - no-pwd-sudo
+
+    - name: Create a new regular user with sudo privileges
+      user:
+        name: "{{ created_username }}"
+        state: present
+        groups: sudo
+        append: true
+        create_home: true
+      tags:
+        - create-user
+
+    - name: Set authorized key for remote user
+      ansible.posix.authorized_key:
+        user: "{{ created_username }}"
+        state: present
+        key: "{{ lookup('file', lookup('env', 'HOME') + '/.ssh/id_ed25519.pub') }}"
+      tags:
+        - create-user
+
+    - name: Disable password authentication for root
+      lineinfile:
+        path: /etc/ssh/ssh_config
+        state: present
+        regexp: '^#?PermitRootLogin'
+        line: 'PermitRootLogin prohibit-password'
+      tags:
+        - disable-password
+
+    - name: Update apt cache and install Nginx
+      apt:
+        name: nginx
+        state: latest
+        update_cache: yes
+      tags:
+        - nginx
+        - nginx-install
+
+    - name: Enable new site
+      file:
+        src: /etc/nginx/sites-available/default
+        dest: /etc/nginx/sites-enabled/default
+        state: link
+      notify: Restart Nginx
+      tags:
+        - nginx
+        - nginx-enable
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
+      tags:
+        - nginx
+        - nginx-restart
