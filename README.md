@@ -17,7 +17,7 @@ Before you can run the playbook, you must first set up the `inventory` file so t
 iac-test-server ansible_host=<public_ip_server> ansible_connection=ssh ansible_user=root 
 ```
 
-The value, `<public_ip_server>` is the IP address of the DigitalOcean droplet you created with Terraform in [Intro-to-DigitalOcean](https://github.com/IaC-Unleashed/Intro-to-DigitalOcean). Once the inventory is in place, you can run the following command to make sure it aligns with what is expected:
+The value, `<public_ip_server>` is the IP address of the DigitalOcean droplet you created with Terraform in [Intro-to-DigitalOcean](https://github.com/IaC-Unleashed/Intro-to-DigitalOcean). Once the inventory is in place, you can run the following command from within the `ansible` directory to make sure it aligns with what is expected:
 
 ```shell
 ansible-inventory -i inventory --list
@@ -50,7 +50,7 @@ The output should look like the following:
 }
 ```
 
-You can also ping the hosts in the inventory by running:
+You can also ping the hosts in the inventory by running the following command from within the `ansible` directory:
 
 ```shell
 $ ansible -i inventory -m ping all
@@ -67,5 +67,13 @@ iac-test-server | SUCCESS => {
     "ping": "pong"
 }
 ```
+
 ---
 
+## Running the Playbook ##
+
+Provisioning the server is accomplished by running the following command from within the `ansible` directory:
+
+```shell
+$ ansible-playbook -i inventory playbook.yml
+```
