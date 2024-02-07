@@ -77,3 +77,13 @@ Provisioning the server is accomplished by running the following command from wi
 ```shell
 $ ansible-playbook -i inventory playbook.yml
 ```
+
+This provisioning runs the following tasks on the remote machine:
+
+- Set up passwordless sudo
+- Create a new user with sudo privileges
+- Copy over local public ssh key for remote access
+- Disable password authentication for root
+- Update apt cache and install Nginx
+- Enable the site
+- Restart Nginx service
